@@ -55,7 +55,6 @@
             background: #222;
             color: white;
             text-align: center;
-            font-weight: bold;
         }
 
         button {
@@ -88,9 +87,21 @@
             margin-bottom: 5px;
         }
 
+        .user-badge {
+            background: var(--gold);
+            color: black;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
         .cd-container {
-            width: 100px;
-            height: 100px;
+            width: 85px;
+            height: 85px;
             margin: 10px auto;
             border-radius: 50%;
             border: 3px solid var(--gold);
@@ -98,24 +109,32 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 10px;
+            font-size: 9px;
             background: #111;
-            text-transform: uppercase;
         }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .user-badge {
-            background: var(--gold);
-            color: black;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 10px;
+        /* Music Toggle Style */
+        .music-ctrl {
+            background: #333;
+            font-size: 0.7rem;
+            padding: 5px;
+            width: auto;
+            margin: 0 auto 10px;
+            border: 1px solid #555;
         }
+
+        .detail-list {
+            text-align: left;
+            font-size: 0.85rem;
+            color: #ddd;
+            margin: 15px 0;
+            padding: 0;
+            list-style: none;
+        }
+        .detail-list li { margin-bottom: 8px; border-left: 2px solid var(--gold); padding-left: 10px; }
 
         .stats-grid {
             display: grid;
@@ -129,7 +148,7 @@
             background: rgba(255,255,255,0.1);
             padding: 8px;
             border-radius: 5px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .stat-item span { color: var(--gold); display: block; font-weight: bold; }
@@ -143,17 +162,7 @@
             gap: 20px;
         }
 
-        .social-links a { font-size: 1.6rem; color: white; text-decoration: none; }
-
-        .detail-list {
-            text-align: left;
-            font-size: 0.85rem;
-            color: #ddd;
-            margin: 15px 0;
-            padding: 0;
-            list-style: none;
-        }
-        .detail-list li { margin-bottom: 8px; border-left: 2px solid var(--gold); padding-left: 10px; }
+        .social-links a { font-size: 1.5rem; color: white; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -163,11 +172,15 @@
         <p style="color: var(--gold); font-size: 0.8rem; margin-bottom: 15px;">Official Gaming & Data Hub</p>
         <input type="text" id="username" placeholder="Create Username">
         <button onclick="createAccount()">CREATE ACCOUNT</button>
-        <p style="font-size: 0.7rem; color: #888; margin-top: 10px;">Please use headphones for better experience 🎧</p>
     </div>
 
     <div id="portfolio-page" class="main-card hidden">
-        <div class="user-badge"><i class="fas fa-user"></i> <span id="user-display"></span></div>
+        <div class="user-badge"><i class="fas fa-user"></i> <span class="display-name"></span></div>
+        
+        <button id="musicBtn" class="music-ctrl" onclick="toggleMusic()">
+            <i class="fas fa-play"></i> PLAY MUSIC
+        </button>
+
         <h2 style="margin: 0; font-size: 1.2rem;">GAMING STORE</h2>
         <div class="cd-container">P90XAIM STORE</div>
 
@@ -175,8 +188,8 @@
             <i class="fas fa-gamepad"></i> FREE FIRE PLAYER MENU
         </button>
 
-        <div style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
-            <button class="service-btn" onclick="showPage('num-details-page')"><i class="fas fa-search"></i> Number Details</button>
+        <div style="margin-top: 10px; max-height: 180px; overflow-y: auto;">
+            <button class="service-btn" onclick="showPage('num-details-page')">Number Details</button>
             <button class="service-btn" onclick="showPage('id-sell-page')">ID Selling Service</button>
             <button class="service-btn" onclick="showPage('fake-number-page')">Fake Numbers</button>
             <button class="service-btn" onclick="showPage('tiktok-page')">UK TikTok</button>
@@ -190,7 +203,7 @@
     </div>
 
     <div id="game-stats-page" class="main-card hidden">
-        <div class="user-badge" id="user-display-stats"></div>
+        <div class="user-badge"><span class="display-name"></span></div>
         <h2 style="color: var(--primary); margin-bottom: 5px;">PLAYER MENU</h2>
         <div class="stats-grid">
             <div class="stat-item"><span>Main UID</span>4536663538</div>
@@ -200,44 +213,54 @@
             <div class="stat-item"><span>Device</span>PC + Mobile</div>
             <div class="stat-item"><span>Region</span>Pakistan</div>
         </div>
-        <button style="background: var(--whatsapp); font-size: 0.85rem;" onclick="window.open('https://wa.me/923134004221?text=Hello%20P90XAIM,%20I%20want%20to%20join%20your%20Guild%20donxGbz!')">
-            <i class="fab fa-whatsapp"></i> JOIN GUILD donxGbz
-        </button>
-        <button class="back-btn" onclick="showPage('portfolio-page')">BACK TO STORE</button>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=I%20want%20to%20join%20donxGbz')">JOIN GUILD</button>
+        <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
     </div>
 
     <div id="num-details-page" class="main-card hidden">
-        <div class="user-badge" id="user-display-num"></div>
-        <h2 style="color: var(--gold);"><i class="fas fa-id-card"></i> NUMBER DETAILS</h2>
+        <div class="user-badge"><span class="display-name"></span></div>
+        <h2 style="color: var(--gold);">NUMBER DETAILS</h2>
         <ul class="detail-list">
             <li>Fresh 2024-25 Data Available</li>
             <li>Owner Name & CNIC Details</li>
             <li>Address & More Information</li>
-            <li>100% Correct Results - Less Price</li>
+            <li>100% Correct Results</li>
         </ul>
-        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=Hello%20P90XAIM,%20I%20want%20to%20get%20Number/SIM%20Details')">SEND NUMBER ON WHATSAPP</button>
-        <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
-    </div>
-
-    <div id="id-sell-page" class="main-card hidden">
-        <div class="user-badge" id="user-display-id"></div>
-        <h2 style="color: var(--gold);">ID SELLING</h2>
-        <ul class="detail-list"><li>Rare Accounts</li><li>Secure Deals</li><li>Less Price</li></ul>
-        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=ID%20Deal')">CONTACT</button>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=Send%20Number%20Details')">WHATSAPP CONTACT</button>
         <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
     </div>
 
     <div id="fake-number-page" class="main-card hidden">
-        <div class="user-badge" id="user-display-fake"></div>
+        <div class="user-badge"><span class="display-name"></span></div>
         <h2 style="color: var(--gold);">FAKE NUMBERS</h2>
-        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=Fake%20Number')">GET DETAILS</button>
+        <ul class="detail-list">
+            <li>OTP for WhatsApp & Telegram</li>
+            <li>Cheap & Affordable Price</li>
+            <li>All Countries Numbers</li>
+            <li>Fast OTP Delivery</li>
+        </ul>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=Need%20Fake%20Number')">GET DETAILS</button>
         <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
     </div>
 
     <div id="tiktok-page" class="main-card hidden">
-        <div class="user-badge" id="user-display-tk"></div>
+        <div class="user-badge"><span class="display-name"></span></div>
         <h2 style="color: var(--gold);">UK TIKTOK</h2>
-        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=UK%20TikTok')">BUY NOW</button>
+        <ul class="detail-list">
+            <li>Monetized Region Accounts</li>
+            <li>Creativity Program Beta</li>
+            <li>Earn in Pounds (£)</li>
+            <li>High Growth - Less Price</li>
+        </ul>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=Need%20UK%20TikTok')">BUY NOW</button>
+        <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
+    </div>
+
+    <div id="id-sell-page" class="main-card hidden">
+        <div class="user-badge"><span class="display-name"></span></div>
+        <h2 style="color: var(--gold);">ID SELLING</h2>
+        <ul class="detail-list"><li>Rare Accounts</li><li>Secure Deals</li><li>Less Price</li></ul>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=ID%20Deal')">CONTACT</button>
         <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
     </div>
 
@@ -246,21 +269,26 @@
     </audio>
 
     <script>
+        const music = document.getElementById('bgMusic');
+        const mBtn = document.getElementById('musicBtn');
+
         function createAccount() {
             const name = document.getElementById('username').value;
-            if(name.trim() === "") {
-                alert("Please enter a username!");
-                return;
-            }
-            // Update username in all badges
-            document.querySelectorAll('[id^="user-display"]').forEach(el => {
-                el.innerText = name.toUpperCase();
-            });
-            
-            // Play music and show main page
-            const music = document.getElementById('bgMusic');
-            music.play().catch(() => {});
+            if(name.trim() === "") { alert("Enter Username!"); return; }
+            document.querySelectorAll('.display-name').forEach(el => el.innerText = name);
             showPage('portfolio-page');
+        }
+
+        function toggleMusic() {
+            if (music.paused) {
+                music.play();
+                mBtn.innerHTML = '<i class="fas fa-pause"></i> PAUSE MUSIC';
+                mBtn.style.color = 'var(--primary)';
+            } else {
+                music.pause();
+                mBtn.innerHTML = '<i class="fas fa-play"></i> PLAY MUSIC';
+                mBtn.style.color = 'white';
+            }
         }
 
         function showPage(pageId) {
