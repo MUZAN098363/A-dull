@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P90XAIM - Gaming Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff4500;
+            --dark: #0f0f0f;
+            --gold: #ffd700;
+            --whatsapp: #25D366;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://medieval-teal-n9ythknuvr.edgeone.app/itachi-uchiha-moon-3840x2160-25777.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-card {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 25px;
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 25px var(--primary);
+            backdrop-filter: blur(5px);
+            width: 90%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .hidden { display: none; }
+
+        input {
+            display: block;
+            margin: 10px auto;
+            padding: 12px;
+            width: 85%;
+            border-radius: 5px;
+            border: none;
+            background: #222;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            border-radius: 5px;
+            transition: 0.3s;
+            width: 100%;
+            text-transform: uppercase;
+        }
+
+        button:hover { transform: scale(1.03); background: #e63e00; }
+
+        .service-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .game-btn {
+            background: linear-gradient(45deg, #444, #222);
+            border: 1px solid var(--primary);
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .cd-container {
+            width: 100px;
+            height: 100px;
+            margin: 10px auto;
+            border-radius: 50%;
+            border: 3px solid var(--gold);
+            animation: spin 6s linear infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            background: #111;
+            text-transform: uppercase;
+        }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .user-badge {
+            background: var(--gold);
+            color: black;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        .stat-item span { color: var(--gold); display: block; font-weight: bold; }
+
+        .back-btn { background: #333; margin-top: 15px; font-size: 0.8rem; }
+
+        .social-links {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-links a { font-size: 1.6rem; color: white; text-decoration: none; }
+
+        .detail-list {
+            text-align: left;
+            font-size: 0.85rem;
+            color: #ddd;
+            margin: 15px 0;
+            padding: 0;
+            list-style: none;
+        }
+        .detail-list li { margin-bottom: 8px; border-left: 2px solid var(--gold); padding-left: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-page" class="main-card">
+        <h2 style="color: var(--primary); margin-bottom: 5px;">P90XAIM STORE</h2>
+        <p style="color: var(--gold); font-size: 0.8rem; margin-bottom: 15px;">Official Gaming & Data Hub</p>
+        <input type="text" id="username" placeholder="Create Username">
+        <button onclick="createAccount()">CREATE ACCOUNT</button>
+        <p style="font-size: 0.7rem; color: #888; margin-top: 10px;">Please use headphones for better experience 🎧</p>
+    </div>
+
+    <div id="portfolio-page" class="main-card hidden">
+        <div class="user-badge"><i class="fas fa-user"></i> <span id="user-display"></span></div>
+        <h2 style="margin: 0; font-size: 1.2rem;">GAMING STORE</h2>
+        <div class="cd-container">P90XAIM STORE</div>
+
+        <button class="game-btn" onclick="showPage('game-stats-page')">
+            <i class="fas fa-gamepad"></i> FREE FIRE PLAYER MENU
+        </button>
+
+        <div style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+            <button class="service-btn" onclick="showPage('num-details-page')"><i class="fas fa-search"></i> Number Details</button>
+            <button class="service-btn" onclick="showPage('id-sell-page')">ID Selling Service</button>
+            <button class="service-btn" onclick="showPage('fake-number-page')">Fake Numbers</button>
+            <button class="service-btn" onclick="showPage('tiktok-page')">UK TikTok</button>
+        </div>
+
+        <div class="social-links">
+            <a href="https://youtube.com/@p90xaim" target="_blank" style="color: #ff0000;"><i class="fab fa-youtube"></i></a>
+            <a href="https://instagram.com/abdullah.empire" target="_blank" style="color: #E4405F;"><i class="fab fa-instagram"></i></a>
+            <a href="https://wa.me/923134004221" target="_blank" style="color: var(--whatsapp);"><i class="fab fa-whatsapp"></i></a>
+        </div>
+    </div>
+
+    <div id="game-stats-page" class="main-card hidden">
+        <div class="user-badge" id="user-display-stats"></div>
+        <h2 style="color: var(--primary); margin-bottom: 5px;">PLAYER MENU</h2>
+        <div class="stats-grid">
+            <div class="stat-item"><span>Main UID</span>4536663538</div>
+            <div class="stat-item"><span>Second ID</span>8015674143</div>
+            <div class="stat-item"><span>Guild</span>donxGbz</div>
+            <div class="stat-item"><span>Rank</span>Unknown</div>
+            <div class="stat-item"><span>Device</span>PC + Mobile</div>
+            <div class="stat-item"><span>Region</span>Pakistan</div>
+        </div>
+        <button style="background: var(--whatsapp); font-size: 0.85rem;" onclick="window.open('https://wa.me/923134004221?text=Hello%20P90XAIM,%20I%20want%20to%20join%20your%20Guild%20donxGbz!')">
+            <i class="fab fa-whatsapp"></i> JOIN GUILD donxGbz
+        </button>
+        <button class="back-btn" onclick="showPage('portfolio-page')">BACK TO STORE</button>
+    </div>
+
+    <div id="num-details-page" class="main-card hidden">
+        <div class="user-badge" id="user-display-num"></div>
+        <h2 style="color: var(--gold);"><i class="fas fa-id-card"></i> NUMBER DETAILS</h2>
+        <ul class="detail-list">
+            <li>Fresh 2024-25 Data Available</li>
+            <li>Owner Name & CNIC Details</li>
+            <li>Address & More Information</li>
+            <li>100% Correct Results - Less Price</li>
+        </ul>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=Hello%20P90XAIM,%20I%20want%20to%20get%20Number/SIM%20Details')">SEND NUMBER ON WHATSAPP</button>
+        <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
+    </div>
+
+    <div id="id-sell-page" class="main-card hidden">
+        <div class="user-badge" id="user-display-id"></div>
+        <h2 style="color: var(--gold);">ID SELLING</h2>
+        <ul class="detail-list"><li>Rare Accounts</li><li>Secure Deals</li><li>Less Price</li></ul>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=ID%20Deal')">CONTACT</button>
+        <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
+    </div>
+
+    <div id="fake-number-page" class="main-card hidden">
+        <div class="user-badge" id="user-display-fake"></div>
+        <h2 style="color: var(--gold);">FAKE NUMBERS</h2>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=Fake%20Number')">GET DETAILS</button>
+        <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
+    </div>
+
+    <div id="tiktok-page" class="main-card hidden">
+        <div class="user-badge" id="user-display-tk"></div>
+        <h2 style="color: var(--gold);">UK TIKTOK</h2>
+        <button style="background: var(--whatsapp);" onclick="window.open('https://wa.me/923134004221?text=UK%20TikTok')">BUY NOW</button>
+        <button class="back-btn" onclick="showPage('portfolio-page')">BACK</button>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://mp3tourl.com/audio/1777719776441-b81fd932-5eea-454a-a05a-51beb2469f9c.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        function createAccount() {
+            const name = document.getElementById('username').value;
+            if(name.trim() === "") {
+                alert("Please enter a username!");
+                return;
+            }
+            // Update username in all badges
+            document.querySelectorAll('[id^="user-display"]').forEach(el => {
+                el.innerText = name.toUpperCase();
+            });
+            
+            // Play music and show main page
+            const music = document.getElementById('bgMusic');
+            music.play().catch(() => {});
+            showPage('portfolio-page');
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.main-card').forEach(card => card.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
