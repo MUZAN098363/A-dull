@@ -6,6 +6,9 @@
 <title>VENOM GAMING | Enter The Symbiote</title>
 <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Bebas+Neue&family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
   :root {
     --venom-black: #050505;
@@ -1611,9 +1614,12 @@
   <div class="venom-subtitle">⬡ GAMING CLAN ⬡</div>
   <div class="venom-tagline">WE ARE VENOM. WE ARE GAMERS.</div>
 
-  <div class="landing-buttons">
-    <button class="btn-venom" onclick="showPage('login-page'); setupUserLogin()">⚡ USER LOGIN</button>
-    <button class="btn-venom admin" onclick="showPage('login-page'); setupAdminLogin()">🔴 ADMIN ACCESS</button>
+  <div class="landing-buttons" style="flex-direction:column;align-items:center;gap:14px">
+    <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+      <button class="btn-venom" style="min-width:160px" onclick="showPage('login-page'); setupLoginFlow('login')">⚡ LOGIN</button>
+      <button class="btn-venom" style="min-width:160px;border-color:#00ff88;color:#00ff88" onclick="showPage('login-page'); setupLoginFlow('register')">✨ REGISTER</button>
+    </div>
+    <button class="btn-venom admin" style="font-size:11px;padding:10px 28px;opacity:0.65" onclick="showPage('login-page'); setupAdminLogin()">🔴 ADMIN ACCESS</button>
   </div>
 
   <svg class="tendrils" viewBox="0 0 1200 150" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
@@ -1630,11 +1636,26 @@
 
       <!-- USER LOGIN BOX -->
       <div class="login-box" id="userLoginBox">
-        <div class="login-title">ENTER THE SYMBIOTE</div>
-        <div class="login-subtitle">⬡ USER PORTAL ⬡</div>
 
-        <!-- Step 1: Email -->
-        <div id="step-email">
+        <!-- LOGIN SCREEN -->
+        <div id="screen-login">
+          <div class="login-title">ENTER THE SYMBIOTE</div>
+          <div class="login-subtitle">⬡ LOGIN ⬡</div>
+          <div class="form-group">
+            <label>Your Email</label>
+            <input type="email" id="loginEmail" placeholder="agent@venom.gg" autocomplete="email">
+          </div>
+          <button class="btn-venom" style="width:100%;margin-top:10px" onclick="doDirectLogin()">⚡ LOGIN →</button>
+          <button class="forgot-link" onclick="showUserRecovery()">🔑 Forgot / Recover Account?</button>
+          <div class="error-msg" id="loginError"></div>
+          <div class="success-msg" id="loginSuccess"></div>
+        </div>
+
+        <!-- REGISTER SCREEN -->
+        <div id="screen-register" style="display:none">
+          <div class="login-title" style="font-size:26px">JOIN THE SYMBIOTE</div>
+          <div class="login-subtitle">⬡ NEW ACCOUNT ⬡</div>
+          <div id="step-email">
           <div class="form-group">
             <label>Your Email</label>
             <input type="email" id="userEmail" placeholder="agent@venom.gg" autocomplete="off">
@@ -1643,10 +1664,11 @@
             <label>Your Name</label>
             <input type="text" id="userName" placeholder="Symbiote Agent">
           </div>
-          <button class="btn-venom" style="width:100%;margin-top:10px" onclick="sendOTP()">SEND OTP →</button>
+          <button class="btn-venom" style="width:100%;margin-top:10px;border-color:#00ff88;color:#00ff88" onclick="sendOTP()">SEND OTP & REGISTER →</button>
           <button class="forgot-link" onclick="showUserRecovery()">🔑 Forgot / Recover Account?</button>
           <div class="error-msg" id="emailError"></div>
           <div class="success-msg" id="emailSuccess"></div>
+          </div>
         </div>
 
         <!-- Step Recovery: User forgot email -->
@@ -1668,12 +1690,12 @@
           <div class="form-group">
             <label>Enter OTP sent to your email</label>
             <div class="otp-inputs">
-              <input type="text" maxlength="1" class="rec-digit" oninput="recOtpNext(this,0)">
-              <input type="text" maxlength="1" class="rec-digit" oninput="recOtpNext(this,1)">
-              <input type="text" maxlength="1" class="rec-digit" oninput="recOtpNext(this,2)">
-              <input type="text" maxlength="1" class="rec-digit" oninput="recOtpNext(this,3)">
-              <input type="text" maxlength="1" class="rec-digit" oninput="recOtpNext(this,4)">
-              <input type="text" maxlength="1" class="rec-digit" oninput="recOtpNext(this,5)">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="rec-digit" autocomplete="off">
             </div>
           </div>
           <div class="otp-timer" id="recOtpTimer">⏳ Code expires in: <span id="recTimerCount">120</span>s</div>
@@ -1697,12 +1719,12 @@
           <div class="form-group">
             <label>Enter OTP sent to your email</label>
             <div class="otp-inputs">
-              <input type="text" maxlength="1" class="otp-digit" oninput="otpNext(this,0)">
-              <input type="text" maxlength="1" class="otp-digit" oninput="otpNext(this,1)">
-              <input type="text" maxlength="1" class="otp-digit" oninput="otpNext(this,2)">
-              <input type="text" maxlength="1" class="otp-digit" oninput="otpNext(this,3)">
-              <input type="text" maxlength="1" class="otp-digit" oninput="otpNext(this,4)">
-              <input type="text" maxlength="1" class="otp-digit" oninput="otpNext(this,5)">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" autocomplete="one-time-code">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" autocomplete="one-time-code">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" autocomplete="one-time-code">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" autocomplete="one-time-code">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" autocomplete="one-time-code">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-digit" autocomplete="one-time-code">
             </div>
           </div>
           <div class="otp-timer" id="otpTimer">⏳ OTP expires in: <span id="timerCount">120</span>s</div>
@@ -1750,12 +1772,12 @@
           <div class="form-group">
             <label>Enter code sent to your email</label>
             <div class="otp-inputs">
-              <input type="text" maxlength="1" class="admin-rec-digit" oninput="adminRecOtpNext(this,0)">
-              <input type="text" maxlength="1" class="admin-rec-digit" oninput="adminRecOtpNext(this,1)">
-              <input type="text" maxlength="1" class="admin-rec-digit" oninput="adminRecOtpNext(this,2)">
-              <input type="text" maxlength="1" class="admin-rec-digit" oninput="adminRecOtpNext(this,3)">
-              <input type="text" maxlength="1" class="admin-rec-digit" oninput="adminRecOtpNext(this,4)">
-              <input type="text" maxlength="1" class="admin-rec-digit" oninput="adminRecOtpNext(this,5)">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="admin-rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="admin-rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="admin-rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="admin-rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="admin-rec-digit" autocomplete="off">
+              <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="admin-rec-digit" autocomplete="off">
             </div>
           </div>
           <div class="otp-timer" id="adminRecTimer">⏳ Code expires in: <span id="adminRecTimerCount">120</span>s</div>
@@ -2170,7 +2192,10 @@
 
       <div class="chat-container">
         <div class="chat-sidebar">
-          <div class="chat-sidebar-title">📡 CONNECTIONS</div>
+          <div class="chat-sidebar-title" style="display:flex;align-items:center;justify-content:space-between">
+            <span>📡 CONNECTIONS</span>
+            <span id="privateChatLiveBadge" style="display:none;font-size:9px;letter-spacing:2px;color:#00ff88;font-family:Orbitron,monospace;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:#00ff88;border-radius:50%;animation:pulse 1.5s infinite;display:inline-block"></span>LIVE</span>
+          </div>
           <div id="chatUserList"></div>
         </div>
         <div class="chat-main">
@@ -2190,18 +2215,23 @@
       </div>
     </div>
 
-    <!-- PUBLIC CHAT SECTION -->
+    <!-- PUBLIC LIVE CHAT SECTION -->
     <div class="section" id="section-pubchat">
-      <div class="section-title">PUBLIC CHAT</div>
+      <div class="section-title">CLAN CHAT</div>
       <div class="section-divider"></div>
-      <div class="pub-chat-container">
+      <div class="pub-chat-container" style="position:relative">
         <div class="pub-chat-header">
-          <div class="pub-chat-title">🌐 CLAN LOUNGE</div>
-          <div class="pub-online-count" id="pubOnlineCount">● SYMBIOTES ONLINE</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="pub-chat-title">🌐 CLAN LOUNGE</div>
+            <div id="liveIndicator" style="display:flex;align-items:center;gap:5px;font-family:Orbitron,monospace;font-size:9px;letter-spacing:2px;color:#00ff88">
+              <span style="width:7px;height:7px;background:#00ff88;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite"></span>LIVE
+            </div>
+          </div>
+          <div class="pub-online-count" id="pubOnlineCount">● LOADING...</div>
         </div>
         <div class="pub-chat-messages" id="pubChatMessages">
-          <div style="text-align:center;color:rgba(255,255,255,0.2);font-family:Orbitron,monospace;font-size:11px;letter-spacing:3px;margin-top:30px">
-            WELCOME TO THE SYMBIOTE LOUNGE — ALL CLAN MEMBERS CAN CHAT HERE
+          <div style="text-align:center;color:rgba(255,255,255,0.2);font-family:Orbitron,monospace;font-size:11px;letter-spacing:3px;margin-top:30px" id="pubChatWelcome">
+            WELCOME TO THE SYMBIOTE LOUNGE — CONNECTING...
           </div>
         </div>
         <div class="pub-chat-input-area">
@@ -2643,12 +2673,34 @@ function showPage(id) {
   pg.classList.add('active');
 }
 
-function setupUserLogin() {
+function setupLoginFlow(mode) {
   document.getElementById('userLoginBox').style.display = '';
   document.getElementById('adminLoginBox').style.display = 'none';
-  document.getElementById('step-email').style.display = '';
-  document.getElementById('step-otp').style.display = 'none';
+  document.getElementById('screen-login').style.display    = mode==='login'    ? '' : 'none';
+  document.getElementById('screen-register').style.display = mode==='register' ? '' : 'none';
+  document.getElementById('step-email').style.display  = '';
+  document.getElementById('step-otp').style.display    = 'none';
+  ['step-recovery','step-recovery-otp','step-recovered'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
   clearErrors();
+  if(mode==='login'){
+    const el=document.getElementById('loginEmail'); if(el) el.value='';
+    ['loginError','loginSuccess'].forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent=''; });
+  }
+}
+function setupUserLogin() { setupLoginFlow('login'); }
+
+function doDirectLogin() {
+  const email = (document.getElementById('loginEmail').value||'').trim();
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if (!email || !email.includes('@')) { errEl.textContent='⚠ Valid email daalo'; return; }
+  const users = getUsers();
+  if (!users[email]) { errEl.textContent='⚠ Account nahi mila. Pehle Register karo.'; return; }
+  currentUser = email;
+  currentRole = 'user';
+  initApp();
 }
 
 function setupAdminLogin() {
@@ -2671,37 +2723,29 @@ function generateOTP() {
 
 async function sendOTP() {
   const email = document.getElementById('userEmail').value.trim();
-  const name = document.getElementById('userName').value.trim();
-  if (!email || !email.includes('@')) {
-    document.getElementById('emailError').textContent = '⚠ Enter a valid email address';
-    return;
-  }
-  if (!name) {
-    document.getElementById('emailError').textContent = '⚠ Enter your name';
-    return;
-  }
+  const name  = document.getElementById('userName').value.trim();
+  if (!email || !email.includes('@')) { document.getElementById('emailError').textContent='⚠ Valid email daalo'; return; }
+  if (!name) { document.getElementById('emailError').textContent='⚠ Apna naam daalo'; return; }
+  const users = getUsers();
+  if (users[email]) { document.getElementById('emailError').textContent='⚠ Email pehle se registered hai! Login karo.'; return; }
 
   showLoading(true);
   generatedOTP = generateOTP();
   pendingEmail = email;
-  pendingName = name;
-
+  pendingName  = name;
   try {
     await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-      to_email: email,
-      to_name: name,
-      otp_code: generatedOTP,
-      message: `Your VENOM GAMING OTP is: ${generatedOTP}\n\nThis code expires in 2 minutes.\n\nWE ARE VENOM.`
+      to_email: email, to_name: name, otp_code: generatedOTP,
+      message: `Your VENOM GAMING OTP is: ${generatedOTP}\n\nExpires in 2 minutes.\n\nWE ARE VENOM.`
     });
-
     showLoading(false);
     document.getElementById('step-email').style.display = 'none';
-    document.getElementById('step-otp').style.display = 'block';
+    document.getElementById('step-otp').style.display   = 'block';
     document.getElementById('emailSuccess').textContent = '✓ OTP sent to ' + email;
     startOTPTimer();
   } catch(e) {
     showLoading(false);
-    document.getElementById('emailError').textContent = '⚠ Failed to send OTP. Check email and try again.';
+    document.getElementById('emailError').textContent = '⚠ OTP nahi gaya. Try again.';
     console.error(e);
   }
 }
@@ -2721,11 +2765,33 @@ function startOTPTimer() {
   }, 1000);
 }
 
-function otpNext(input, idx) {
-  input.value = input.value.replace(/\D/g, '');
-  const digits = document.querySelectorAll('.otp-digit');
-  if (input.value && idx < 5) digits[idx + 1].focus();
-}
+function otpNext(input, idx) { /* handled by robust handler */ }
+(function(){
+  function sib(inp){return Array.from(inp.closest('.otp-inputs').querySelectorAll('input'));}
+  function isO(el){return el&&['otp-digit','rec-digit','admin-rec-digit'].some(c=>el.classList.contains(c));}
+  document.addEventListener('input',function(e){
+    if(!isO(e.target))return;
+    const inp=e.target,all=sib(inp),i=all.indexOf(inp);
+    inp.value=inp.value.replace(/\D/g,'').slice(0,1);
+    if(inp.value&&i<all.length-1)all[i+1].focus();
+  },true);
+  document.addEventListener('keydown',function(e){
+    if(!isO(e.target))return;
+    const inp=e.target,all=sib(inp),i=all.indexOf(inp);
+    if(e.key==='Backspace'){e.preventDefault();if(inp.value)inp.value='';else if(i>0){all[i-1].focus();all[i-1].value='';}}
+    else if(e.key==='ArrowLeft'&&i>0)all[i-1].focus();
+    else if(e.key==='ArrowRight'&&i<all.length-1)all[i+1].focus();
+  },true);
+  document.addEventListener('paste',function(e){
+    if(!isO(e.target))return;
+    e.preventDefault();
+    const d=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'');
+    const all=sib(e.target);
+    all.forEach((b,i)=>b.value=d[i]||'');
+    const last=Math.min(d.length,all.length)-1;
+    if(last>=0)all[last].focus();
+  },true);
+})();
 
 function verifyOTP() {
   const digits = document.querySelectorAll('.otp-digit');
@@ -3011,6 +3077,36 @@ function initApp() {
   setupTicker();
   renderUserSectionsViewer();
   if (currentRole === 'admin') renderAdminSectionsList();
+  // Init Firebase for live chat
+  const fbOk = initFirebase();
+  // Listen for new private messages to show badge on CHAT tab
+  if (fbOk) {
+    setTimeout(() => startPrivateChatBadgeListener(), 1000);
+  }
+}
+
+// Live badge listener: shows red dot on CHAT tab when new msg arrives
+function startPrivateChatBadgeListener() {
+  if (!firebaseDb || !currentUser) return;
+  const me = currentRole === 'admin' ? 'admin' : currentUser;
+  // For users: watch the admin conversation
+  // For admin: watch all convos
+  const users = getUsers();
+  const partners = currentRole === 'admin' ? Object.keys(users) : ['admin'];
+
+  partners.forEach(partner => {
+    const key = fbChatKey(me, partner);
+    firebase.database().ref('privatechat/' + key).limitToLast(1).on('value', snap => {
+      if (!snap.val()) return;
+      const msgs = Object.values(snap.val());
+      const lastMsg = msgs[0];
+      // If last message is from the other party and we are NOT currently in the chat with them
+      if (lastMsg && lastMsg.from !== me && currentChatPartner !== partner) {
+        const badge = document.getElementById('badge-chat');
+        if (badge) badge.classList.add('show');
+      }
+    });
+  });
 }
 
 function setupNavbar() {
@@ -3073,7 +3169,7 @@ function switchSection(id) {
   currentSection = id;
 
   if (id === 'gaming') { renderGamingSection(); renderMyClan(); }
-  if (id === 'chat') renderChatSection();
+  if (id === 'chat') { renderChatSection(); const badge = document.getElementById('badge-chat'); if (badge) badge.classList.remove('show'); }
   if (id === 'admin') { renderAdminPanel(); renderAdminSectionsList(); }
   if (id === 'pubchat') renderPublicChat();
   if (id === 'market') renderMarketPage();
@@ -3323,52 +3419,97 @@ function closeModal() {
   document.getElementById('profileModal').classList.remove('show');
 }
 
-// ==================== CHAT SECTION ====================
+// ==================== CHAT SECTION (FIREBASE LIVE) ====================
+let privateChatListener = null;
+let privateChatUnsubscribers = {}; // track per-user listeners for sidebar
+
 function renderChatSection() {
   const chatList = document.getElementById('chatUserList');
   const users = getUsers();
 
   if (currentRole === 'admin') {
-    // Admin sees all users
     const allUsers = Object.values(users);
     if (allUsers.length === 0) {
       chatList.innerHTML = '<div style="padding:20px;font-size:12px;color:var(--venom-silver);letter-spacing:2px;font-family:Orbitron,monospace">NO USERS YET</div>';
       return;
     }
-    chatList.innerHTML = allUsers.map(u => {
-      const key = chatKey('admin', u.email);
+    // Render immediately, then update previews from Firebase if available
+    const renderAdminList = (previewMap) => {
+      chatList.innerHTML = allUsers.map(u => {
+        const info = previewMap[u.email] || {};
+        const lastMsg = info.lastMsg || 'No messages yet';
+        const unread = info.unread || 0;
+        return `
+          <div class="chat-user-item ${currentChatPartner === u.email ? 'active' : ''}" onclick="openChat('${u.email}')">
+            <div class="chat-user-avatar">
+              ${u.profilePic ? `<img src="${u.profilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : (u.name ? u.name[0].toUpperCase() : '?')}
+            </div>
+            <div class="chat-user-info">
+              <div class="chat-user-name">${u.name || 'Agent'}</div>
+              <div class="chat-user-preview">${lastMsg}</div>
+            </div>
+            ${unread > 0 ? `<div class="chat-unread">${unread}</div>` : ''}
+          </div>`;
+      }).join('');
+    };
+
+    if (firebaseDb) {
+      // Pull preview for all users
+      const previewMap = {};
+      let pending = allUsers.length;
+      allUsers.forEach(u => {
+        const key = fbChatKey('admin', u.email);
+        firebase.database().ref('privatechat/' + key).limitToLast(1).once('value', snap => {
+          const data = snap.val() || {};
+          const msgs = Object.values(data);
+          previewMap[u.email] = {
+            lastMsg: msgs.length ? msgs[0].text : 'No messages yet',
+            unread: 0
+          };
+          pending--;
+          if (pending === 0) renderAdminList(previewMap);
+        });
+      });
+    } else {
       const chats = getChats();
-      const msgs = chats[key] || [];
-      const lastMsg = msgs.length ? msgs[msgs.length-1].text : '';
-      const unread = msgs.filter(m => m.from !== 'admin' && !m.readByAdmin).length;
-      return `
-        <div class="chat-user-item ${currentChatPartner === u.email ? 'active' : ''}" onclick="openChat('${u.email}')">
-          <div class="chat-user-avatar">
-            ${u.profilePic ? `<img src="${u.profilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : (u.name ? u.name[0].toUpperCase() : '?')}
-          </div>
-          <div class="chat-user-info">
-            <div class="chat-user-name">${u.name || 'Agent'}</div>
-            <div class="chat-user-preview">${lastMsg || 'No messages yet'}</div>
-          </div>
-          ${unread > 0 ? `<div class="chat-unread">${unread}</div>` : ''}
-        </div>`;
-    }).join('');
+      const previewMap = {};
+      allUsers.forEach(u => {
+        const key = chatKey('admin', u.email);
+        const msgs = chats[key] || [];
+        previewMap[u.email] = {
+          lastMsg: msgs.length ? msgs[msgs.length-1].text : 'No messages yet',
+          unread: msgs.filter(m => m.from !== 'admin' && !m.readByAdmin).length
+        };
+      });
+      renderAdminList(previewMap);
+    }
   } else {
     // User sees only admin
-    const chats = getChats();
-    const key = chatKey('admin', currentUser);
-    const msgs = chats[key] || [];
-    const lastMsg = msgs.length ? msgs[msgs.length-1].text : '';
     chatList.innerHTML = `
       <div class="chat-user-item ${currentChatPartner === 'admin' ? 'active' : ''}" onclick="openChat('admin')">
         <div class="chat-user-avatar" style="border-color:var(--venom-tongue)">👑</div>
         <div class="chat-user-info">
           <div class="chat-user-name" style="color:var(--venom-tongue)">ADMIN</div>
-          <div class="chat-user-preview">${lastMsg || 'Contact the admin...'}</div>
+          <div class="chat-user-preview" id="adminPreviewText">Loading...</div>
         </div>
         <div class="online-dot"></div>
       </div>`;
+    // Load preview
+    if (firebaseDb) {
+      const key = fbChatKey('admin', currentUser);
+      firebase.database().ref('privatechat/' + key).limitToLast(1).once('value', snap => {
+        const data = snap.val() || {};
+        const msgs = Object.values(data);
+        const el = document.getElementById('adminPreviewText');
+        if (el) el.textContent = msgs.length ? msgs[0].text : 'Contact the admin...';
+      });
+    }
   }
+}
+
+// Firebase-safe chat key (no dots in keys)
+function fbChatKey(a, b) {
+  return [a, b].sort().join('___').replace(/\./g, '_dot_').replace(/@/g, '_at_');
 }
 
 function openChat(partnerEmail) {
@@ -3396,7 +3537,10 @@ function openChat(partnerEmail) {
     </div>
     <div>
       <div class="chat-header-name">${partnerName}</div>
-      <div class="chat-header-status">● ONLINE</div>
+      <div class="chat-header-status" style="display:flex;align-items:center;gap:5px">
+        <span style="width:6px;height:6px;background:#00ff88;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite"></span>
+        ${firebaseDb ? '<span style="color:#00ff88">● LIVE CHAT</span>' : '<span>● ONLINE</span>'}
+      </div>
     </div>`;
 
   loadMessages();
@@ -3404,26 +3548,54 @@ function openChat(partnerEmail) {
   renderChatSection(); // Refresh sidebar
 }
 
-function loadMessages() {
-  const chats = getChats();
+function renderPrivateMsgs(msgs) {
   const me = currentRole === 'admin' ? 'admin' : currentUser;
-  const key = chatKey(me, currentChatPartner);
-  const msgs = chats[key] || [];
-
   const container = document.getElementById('chatMessages');
+  if (!container) return;
+  const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 60;
   container.innerHTML = msgs.length === 0
     ? '<div style="text-align:center;color:rgba(255,255,255,0.2);font-family:Orbitron,monospace;font-size:12px;letter-spacing:3px;margin-top:40px">NO MESSAGES YET — START THE CONVERSATION</div>'
     : msgs.map(m => {
-        const isMine = m.from === (currentRole === 'admin' ? 'admin' : currentUser);
+        const isMine = m.from === me;
         return `
-          <div class="msg-bubble ${isMine ? 'sent' : 'received'}">
-            ${!isMine ? `<div class="msg-sender">${m.senderName || 'Agent'}</div>` : ''}
+          <div class="msg-bubble ${isMine ? 'sent' : 'received'}" style="animation:msgAppear 0.2s ease-out">
+            ${!isMine ? `<div class="msg-sender">${escapeHtml(m.senderName || 'Agent')}</div>` : ''}
             <div class="msg-text">${escapeHtml(m.text)}</div>
             <div class="msg-time">${formatTime(m.time)}</div>
           </div>`;
       }).join('');
+  if (wasAtBottom || msgs.length <= 3) container.scrollTop = container.scrollHeight;
+}
 
-  container.scrollTop = container.scrollHeight;
+function loadMessages() {
+  const me = currentRole === 'admin' ? 'admin' : currentUser;
+
+  // Detach previous listener
+  if (privateChatListener) {
+    const oldKey = privateChatListener._key;
+    if (oldKey && firebaseDb) {
+      firebase.database().ref('privatechat/' + oldKey).off('value', privateChatListener._fn);
+    }
+    privateChatListener = null;
+  }
+
+  if (firebaseDb) {
+    const key = fbChatKey(me, currentChatPartner);
+    const fn = firebase.database().ref('privatechat/' + key).limitToLast(200).on('value', snap => {
+      const data = snap.val() || {};
+      const msgs = Object.values(data).sort((a,b) => a.time - b.time);
+      renderPrivateMsgs(msgs);
+      // Refresh sidebar preview
+      setTimeout(renderChatSection, 100);
+    });
+    privateChatListener = { _key: key, _fn: fn };
+  } else {
+    // Fallback localStorage
+    const chats = getChats();
+    const key = chatKey(me, currentChatPartner);
+    const msgs = chats[key] || [];
+    renderPrivateMsgs(msgs);
+  }
 }
 
 function sendMsg() {
@@ -3431,37 +3603,43 @@ function sendMsg() {
   const text = input.value.trim();
   if (!text || !currentChatPartner) return;
 
-  const chats = getChats();
-  const me = currentRole === 'admin' ? 'admin' : currentUser;
-  const key = chatKey(me, currentChatPartner);
-  if (!chats[key]) chats[key] = [];
-
   const users = getUsers();
-  let senderName;
-  if (currentRole === 'admin') senderName = 'ADMIN';
-  else senderName = users[currentUser]?.name || 'Agent';
+  const me = currentRole === 'admin' ? 'admin' : currentUser;
+  let senderName = currentRole === 'admin' ? 'ADMIN' : (users[currentUser]?.name || 'Agent');
 
-  chats[key].push({
-    from: me,
-    senderName,
-    text,
-    time: Date.now(),
-    readByAdmin: currentRole === 'admin'
-  });
-
-  saveChats(chats);
+  const msgObj = { from: me, senderName, text, time: Date.now() };
   input.value = '';
-  loadMessages();
-  renderChatSection();
+
+  if (firebaseDb) {
+    const key = fbChatKey(me, currentChatPartner);
+    firebase.database().ref('privatechat/' + key).push(msgObj);
+    // Also update seen status node for admin
+    if (currentRole === 'admin') {
+      firebase.database().ref('privatechat_seen/' + key + '/adminSeen').set(Date.now());
+    }
+  } else {
+    const chats = getChats();
+    const key = chatKey(me, currentChatPartner);
+    if (!chats[key]) chats[key] = [];
+    chats[key].push({ ...msgObj, readByAdmin: currentRole === 'admin' });
+    saveChats(chats);
+    loadMessages();
+    renderChatSection();
+  }
 }
 
 function markAsRead(partnerEmail) {
   if (currentRole !== 'admin') return;
-  const chats = getChats();
-  const key = chatKey('admin', partnerEmail);
-  if (chats[key]) {
-    chats[key] = chats[key].map(m => ({ ...m, readByAdmin: true }));
-    saveChats(chats);
+  if (firebaseDb) {
+    const key = fbChatKey('admin', partnerEmail);
+    firebase.database().ref('privatechat_seen/' + key + '/adminSeen').set(Date.now());
+  } else {
+    const chats = getChats();
+    const key = chatKey('admin', partnerEmail);
+    if (chats[key]) {
+      chats[key] = chats[key].map(m => ({ ...m, readByAdmin: true }));
+      saveChats(chats);
+    }
   }
 }
 
@@ -3594,6 +3772,20 @@ function adminDeleteUser(email) {
     const chats = getChats();
     Object.keys(chats).forEach(k => { if (k.includes(email)) delete chats[k]; });
     saveChats(chats);
+
+    // Also remove from Firebase privatechat
+    if (firebaseDb) {
+      // Try to remove private chat nodes involving this user
+      const safeEmail = email.replace(/\./g,'_dot_').replace(/@/g,'_at_');
+      firebase.database().ref('privatechat').once('value', snap => {
+        const data = snap.val() || {};
+        Object.keys(data).forEach(k => {
+          if (k.includes(safeEmail)) {
+            firebase.database().ref('privatechat/' + k).remove();
+          }
+        });
+      });
+    }
 
     const pubMsgs = getPubChats().filter(m => m.from !== email);
     savePubChats(pubMsgs);
@@ -3934,41 +4126,114 @@ function renderSocialButtons(u) {
 }
 
 // ==================== PUBLIC CHAT ====================
+// ==================== FIREBASE LIVE PUBLIC CHAT ====================
+// 🔥 FIREBASE CONFIG — apna config yahan paste karo
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDPR9Qg5IodSk_nIGpDniKTFPtZkgwI7hM",
+  authDomain: "venomxstore-42511.firebaseapp.com",
+  databaseURL: "https://venomxstore-42511-default-rtdb.firebaseio.com",
+  projectId: "venomxstore-42511",
+  storageBucket: "venomxstore-42511.firebasestorage.app",
+  messagingSenderId: "1053880107074",
+  appId: "1:1053880107074:web:ec567d7875d877ce4f2ddb",
+  measurementId: "G-YH9ZBLJZHG"
+};
+
+let firebaseApp = null;
+let firebaseDb  = null;
+let pubChatListener = null;
+
+function initFirebase() {
+  try {
+    if (!firebase.apps.length) {
+      firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+    } else {
+      firebaseApp = firebase.apps[0];
+    }
+    firebaseDb = firebase.database();
+    console.log("✅ Firebase connected");
+    // Show LIVE badge in private chat sidebar
+    const liveEl = document.getElementById('privateChatLiveBadge');
+    if (liveEl) liveEl.style.display = 'flex';
+    return true;
+  } catch(e) {
+    console.warn("Firebase not configured — using localStorage fallback", e);
+    return false;
+  }
+}
+
+// Fallback — localStorage (same browser only)
 function getPubChats() { return JSON.parse(localStorage.getItem('venom_pubchat') || '[]'); }
 function savePubChats(c) { localStorage.setItem('venom_pubchat', JSON.stringify(c)); }
 
 function renderPublicChat() {
+  // If firebase ready — start live listener
+  if (firebaseDb) {
+    startLivePubChat();
+    return;
+  }
+  // Fallback
   const msgs = getPubChats();
+  renderPubMessages(msgs);
+}
+
+function startLivePubChat() {
+  const container = document.getElementById('pubChatMessages');
+  // Remove old listener
+  if (pubChatListener) {
+    firebase.database().ref('pubchat').off('value', pubChatListener);
+  }
+
+  // Listen for messages in real-time
+  pubChatListener = firebase.database().ref('pubchat').limitToLast(200).on('value', snap => {
+    const data = snap.val() || {};
+    const msgs = Object.values(data).sort((a,b) => a.time - b.time);
+
+    // Update online count
+    const users = getUsers();
+    const total = Object.keys(users).length;
+    document.getElementById('pubOnlineCount').textContent = `● ${total} SYMBIOTE${total!==1?'S':''} REGISTERED`;
+
+    renderPubMessages(msgs);
+  });
+}
+
+function renderPubMessages(msgs) {
   const container = document.getElementById('pubChatMessages');
   const users = getUsers();
-  const totalOnline = Object.keys(users).length;
-  document.getElementById('pubOnlineCount').textContent = `● ${totalOnline} SYMBIOTE${totalOnline !== 1 ? 'S' : ''} REGISTERED`;
+  const me = currentRole === 'admin' ? 'admin' : currentUser;
 
-  if (msgs.length === 0) {
-    container.innerHTML = `<div style="text-align:center;color:rgba(255,255,255,0.2);font-family:Orbitron,monospace;font-size:11px;letter-spacing:3px;margin-top:30px">
-      WELCOME TO THE SYMBIOTE LOUNGE — ALL CLAN MEMBERS CAN CHAT HERE
+  if (!msgs.length) {
+    container.innerHTML = `<div style="text-align:center;color:rgba(255,255,255,0.2);font-family:Orbitron,monospace;font-size:11px;letter-spacing:3px;margin-top:40px;padding:20px">
+      🌐 CLAN LOUNGE MEIN KOI MESSAGE NAHI — PEHLE MESSAGE BHEJO!
     </div>`;
     return;
   }
 
-  const me = currentRole === 'admin' ? 'admin' : currentUser;
+  const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 60;
+
   container.innerHTML = msgs.map(m => {
     const isMine = m.from === me;
     const u = users[m.from] || {};
     const avatarHtml = m.from === 'admin'
-      ? '<span>👑</span>'
-      : (u.profilePic ? `<img src="${u.profilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : `<span>${(u.name || '?')[0].toUpperCase()}</span>`);
+      ? '<span style="font-size:18px">👑</span>'
+      : (u.profilePic
+          ? `<img src="${u.profilePic}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+          : `<span style="font-size:16px;font-weight:700">${(u.name||'?')[0].toUpperCase()}</span>`);
+    const nameColor = m.from === 'admin' ? 'var(--venom-tongue)' : (isMine ? 'var(--venom-accent)' : 'var(--venom-glow)');
     return `
-      <div class="pub-msg ${isMine ? 'mine' : ''}">
-        <div class="pub-msg-avatar">${avatarHtml}</div>
+      <div class="pub-msg ${isMine ? 'mine' : ''}" style="animation:msgIn 0.2s ease-out">
+        ${!isMine ? `<div class="pub-msg-avatar">${avatarHtml}</div>` : ''}
         <div class="pub-msg-body">
-          <div class="pub-msg-name">${m.senderName}</div>
+          ${!isMine ? `<div class="pub-msg-name" style="color:${nameColor}">${escapeHtml(m.senderName||'Agent')}</div>` : ''}
           <div class="pub-msg-text">${escapeHtml(m.text)}</div>
           <div class="pub-msg-time">${formatTime(m.time)}</div>
         </div>
+        ${isMine ? `<div class="pub-msg-avatar" style="margin-left:8px;margin-right:0">${avatarHtml}</div>` : ''}
       </div>`;
   }).join('');
-  container.scrollTop = container.scrollHeight;
+
+  if (wasAtBottom) container.scrollTop = container.scrollHeight;
 }
 
 function sendPublicMsg() {
@@ -3977,23 +4242,33 @@ function sendPublicMsg() {
   if (!text) return;
 
   const users = getUsers();
-  let senderName;
-  if (currentRole === 'admin') senderName = 'ADMIN';
-  else senderName = users[currentUser]?.name || 'Agent';
+  const senderName = currentRole === 'admin' ? 'ADMIN' : (users[currentUser]?.name || 'Agent');
+  const from = currentRole === 'admin' ? 'admin' : currentUser;
 
-  const msgs = getPubChats();
-  msgs.push({
-    from: currentRole === 'admin' ? 'admin' : currentUser,
-    senderName,
-    text,
-    time: Date.now()
-  });
-  // Keep last 200 messages
-  if (msgs.length > 200) msgs.splice(0, msgs.length - 200);
-  savePubChats(msgs);
+  const msgObj = { from, senderName, text, time: Date.now() };
   input.value = '';
-  renderPublicChat();
+
+  if (firebaseDb) {
+    // Push to Firebase — all users will see it instantly
+    firebase.database().ref('pubchat').push(msgObj);
+  } else {
+    // Fallback localStorage
+    const msgs = getPubChats();
+    msgs.push(msgObj);
+    if (msgs.length > 200) msgs.splice(0, msgs.length - 200);
+    savePubChats(msgs);
+    renderPublicChat();
+  }
 }
+
+// Also add CSS animation for new messages
+const _pubStyle = document.createElement('style');
+_pubStyle.textContent = `
+  @keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  .pub-msg-avatar { width:34px;height:34px;border-radius:50%;background:var(--venom-purple);border:1px solid rgba(123,0,255,0.4);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0; }
+  .pub-msg.mine .pub-msg-text { background:linear-gradient(135deg,rgba(123,0,255,0.25),rgba(157,0,255,0.15));border-color:rgba(123,0,255,0.4); }
+`;
+document.head.appendChild(_pubStyle);
 
 // ==================== LIVE CUSTOMISATION ====================
 function toggleCustomPanel() {
