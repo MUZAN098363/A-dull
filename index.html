@@ -2691,16 +2691,44 @@ function setupLoginFlow(mode) {
 }
 function setupUserLogin() { setupLoginFlow('login'); }
 
-function doDirectLogin() {
+async function doDirectLogin() {
   const email = (document.getElementById('loginEmail').value||'').trim();
   const errEl = document.getElementById('loginError');
   errEl.textContent = '';
   if (!email || !email.includes('@')) { errEl.textContent='⚠ Valid email daalo'; return; }
   const users = getUsers();
-  if (!users[email]) { errEl.textContent='⚠ Account nahi mila. Pehle Register karo.'; return; }
-  currentUser = email;
-  currentRole = 'user';
-  initApp();
+
+  // Check localStorage first
+  if (users[email]) {
+    currentUser = email;
+    currentRole = 'user';
+    initApp();
+    return;
+  }
+
+  // If not in localStorage, try Firebase (user registered on another device)
+  if (firebaseDb) {
+    showLoading(true);
+    try {
+      const safeEmail = email.replace(/\./g,'_dot_').replace(/@/g,'_at_');
+      const snap = await firebase.database().ref('users/' + safeEmail).once('value');
+      showLoading(false);
+      if (snap.exists()) {
+        // Sync to local and login
+        users[email] = snap.val();
+        saveUsers(users);
+        currentUser = email;
+        currentRole = 'user';
+        initApp();
+        return;
+      }
+    } catch(fbErr) {
+      showLoading(false);
+      console.warn('Firebase login check failed:', fbErr);
+    }
+  }
+
+  errEl.textContent='⚠ Account nahi mila. Pehle Register karo.';
 }
 
 function setupAdminLogin() {
@@ -2724,18 +2752,48 @@ function generateOTP() {
 async function sendOTP() {
   const email = document.getElementById('userEmail').value.trim();
   const name  = document.getElementById('userName').value.trim();
-  if (!email || !email.includes('@')) { document.getElementById('emailError').textContent='⚠ Valid email daalo'; return; }
-  if (!name) { document.getElementById('emailError').textContent='⚠ Apna naam daalo'; return; }
+  const errEl = document.getElementById('emailError');
+  errEl.textContent = '';
+  if (!email || !email.includes('@')) { errEl.textContent='⚠ Valid email daalo'; return; }
+  if (!name) { errEl.textContent='⚠ Apna naam daalo'; return; }
+
+  // Check localStorage first
   const users = getUsers();
-  if (users[email]) { document.getElementById('emailError').textContent='⚠ Email pehle se registered hai! Login karo.'; return; }
+  if (users[email]) { errEl.textContent='⚠ Email pehle se registered hai! Login karo.'; return; }
 
   showLoading(true);
+
+  // Also check Firebase if connected (for users registered on other devices)
+  if (firebaseDb) {
+    try {
+      const safeEmail = email.replace(/\./g,'_dot_').replace(/@/g,'_at_');
+      const snap = await firebase.database().ref('users/' + safeEmail).once('value');
+      if (snap.exists()) {
+        // Sync to localStorage too
+        const fbUser = snap.val();
+        users[email] = fbUser;
+        saveUsers(users);
+        showLoading(false);
+        errEl.textContent = '⚠ Email pehle se registered hai! Login karo.';
+        return;
+      }
+    } catch(fbErr) {
+      console.warn('Firebase user check failed:', fbErr);
+      // Continue anyway
+    }
+  }
+
   generatedOTP = generateOTP();
   pendingEmail = email;
   pendingName  = name;
+
   try {
+    // Re-init EmailJS just in case
+    emailjs.init("XWz36002KPluD_AVT");
     await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-      to_email: email, to_name: name, otp_code: generatedOTP,
+      to_email: email,
+      to_name: name,
+      otp_code: generatedOTP,
       message: `Your VENOM GAMING OTP is: ${generatedOTP}\n\nExpires in 2 minutes.\n\nWE ARE VENOM.`
     });
     showLoading(false);
@@ -2745,8 +2803,19 @@ async function sendOTP() {
     startOTPTimer();
   } catch(e) {
     showLoading(false);
-    document.getElementById('emailError').textContent = '⚠ OTP nahi gaya. Try again.';
-    console.error(e);
+    const code = e?.status || e?.text || JSON.stringify(e);
+    console.error('EmailJS Error:', e);
+    if (e && e.status === 400) {
+      errEl.textContent = '⚠ Template error — EmailJS dashboard mein template variables check karo.';
+    } else if (e && e.status === 401) {
+      errEl.textContent = '⚠ EmailJS Public Key galat hai — dashboard se dobara copy karo.';
+    } else if (e && e.status === 402) {
+      errEl.textContent = '⚠ EmailJS monthly quota khatam ho gaya! Account upgrade karo.';
+    } else if (e && e.status === 422) {
+      errEl.textContent = '⚠ Service ya Template ID galat hai — EmailJS dashboard check karo.';
+    } else {
+      errEl.textContent = '⚠ OTP nahi gaya. Internet check karo ya thodi der baad try karo.';
+    }
   }
 }
 
@@ -2793,7 +2862,7 @@ function otpNext(input, idx) { /* handled by robust handler */ }
   },true);
 })();
 
-function verifyOTP() {
+async function verifyOTP() {
   const digits = document.querySelectorAll('.otp-digit');
   const entered = Array.from(digits).map(d => d.value).join('');
   if (entered.length < 6) {
@@ -2815,7 +2884,7 @@ function verifyOTP() {
   // Login / Register user
   const users = getUsers();
   if (!users[pendingEmail]) {
-    users[pendingEmail] = {
+    const newUser = {
       email: pendingEmail,
       name: pendingName,
       profilePic: null,
@@ -2824,7 +2893,19 @@ function verifyOTP() {
       whatsapp: '', instagram: '', youtube: '', tiktok: '', facebook: '', twitter: '',
       joinedAt: new Date().toISOString()
     };
+    users[pendingEmail] = newUser;
     saveUsers(users);
+
+    // ✅ Also save to Firebase so other devices can see this user
+    if (firebaseDb) {
+      try {
+        const safeEmail = pendingEmail.replace(/\./g,'_dot_').replace(/@/g,'_at_');
+        await firebase.database().ref('users/' + safeEmail).set(newUser);
+        console.log('✅ User saved to Firebase');
+      } catch(fbErr) {
+        console.warn('Firebase user save failed (localStorage only):', fbErr);
+      }
+    }
   }
 
   currentUser = pendingEmail;
@@ -3063,13 +3144,45 @@ function logout() {
   currentUser = null;
   currentRole = null;
   currentChatPartner = null;
+  // ✅ Clear saved session
+  localStorage.removeItem('venom_session');
   document.getElementById('customToggle').style.display = 'none';
   document.getElementById('customPanel').classList.remove('open');
   showPage('landing-page');
 }
 
+// ==================== SESSION SAVE/RESTORE ====================
+function saveSession() {
+  localStorage.setItem('venom_session', JSON.stringify({
+    user: currentUser,
+    role: currentRole
+  }));
+}
+
+function restoreSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem('venom_session') || 'null');
+    if (!s || !s.user || !s.role) return false;
+    if (s.role === 'admin') {
+      currentUser = 'admin';
+      currentRole = 'admin';
+      return true;
+    }
+    // For normal users — verify they still exist
+    const users = getUsers();
+    if (users[s.user]) {
+      currentUser = s.user;
+      currentRole = s.role;
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
 // ==================== INIT APP ====================
 function initApp() {
+  // ✅ Save session so reload doesn't logout
+  saveSession();
   showPage('app-page');
   setupNavbar();
   switchSection('profile');
@@ -4859,6 +4972,9 @@ document.addEventListener('keydown', e => {
 
 // Load custom settings on page load
 document.addEventListener('DOMContentLoaded', () => {
+  // ✅ Init Firebase early so sendOTP can check existing users
+  initFirebase();
+
   loadCustomSettings();
   // Apply saved admin identity settings on load
   const s = getAdminSettings();
@@ -4874,6 +4990,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tl) tl.textContent = s.tagline;
     const cTagEl = document.getElementById('cTagline');
     if (cTagEl) cTagEl.value = s.tagline;
+  }
+
+  // ✅ Auto-restore session on reload / desktop shortcut open
+  if (restoreSession()) {
+    initApp();
   }
 });
 </script>
